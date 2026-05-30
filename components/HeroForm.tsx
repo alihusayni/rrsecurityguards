@@ -16,6 +16,8 @@ export default function HeroForm() {
 
   const submittedRef = useRef(false);
   const abandonedSentRef = useRef(false);
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const formStartTimeRef = useRef(Date.now());
 
   useEffect(() => {
     setCaptchaA(Math.floor(Math.random() * 9) + 1);
@@ -26,6 +28,10 @@ export default function HeroForm() {
   useEffect(() => {
     const sendAbandonment = () => {
       if (submittedRef.current || abandonedSentRef.current) return;
+      if (confirmEmailRef.current) return;
+
+      const timeElapsed = Date.now() - formStartTimeRef.current;
+      if (timeElapsed < 4000) return;
 
       const currentName = nameRef.current;
       const currentEmail = emailRef.current;
@@ -44,6 +50,8 @@ export default function HeroForm() {
         details: detailsRef.current,
         abandoned: true,
         pageUrl: window.location.href,
+        confirm_email: confirmEmailRef.current,
+        timeElapsed: timeElapsed,
       });
 
       navigator.sendBeacon(
@@ -71,12 +79,14 @@ export default function HeroForm() {
   const phoneRef = useRef(phone);
   const serviceRef = useRef(service);
   const detailsRef = useRef(details);
+  const confirmEmailRef = useRef(confirmEmail);
 
   useEffect(() => { nameRef.current = name; }, [name]);
   useEffect(() => { emailRef.current = email; }, [email]);
   useEffect(() => { phoneRef.current = phone; }, [phone]);
   useEffect(() => { serviceRef.current = service; }, [service]);
   useEffect(() => { detailsRef.current = details; }, [details]);
+  useEffect(() => { confirmEmailRef.current = confirmEmail; }, [confirmEmail]);
 
   const resetCaptcha = () => {
     setCaptchaA(Math.floor(Math.random() * 9) + 1);
@@ -87,6 +97,13 @@ export default function HeroForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (confirmEmail) {
+      // Fake success for bots
+      submittedRef.current = true;
+      setStatus("success");
+      return;
+    }
+
     if (parseInt(captchaInput) !== captchaA + captchaB) {
       alert("Incorrect answer. Please try again.");
       resetCaptcha();
@@ -94,12 +111,22 @@ export default function HeroForm() {
     }
 
     setStatus("sending");
+    const timeElapsed = Date.now() - formStartTimeRef.current;
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, service, details, pageUrl: window.location.href }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          service,
+          details,
+          pageUrl: window.location.href,
+          confirm_email: confirmEmail,
+          timeElapsed,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to send");
@@ -112,8 +139,23 @@ export default function HeroForm() {
       setService("Mobile Patrol");
       setDetails("");
       resetCaptcha();
-    } catch {
+    } catch (err: any) {
       setStatus("error");
+      try {
+        await fetch("https://www.despora.ai/api/alerts/form-failure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            siteName: "RR Security Guards",
+            pageUrl: window.location.href,
+            errorDetails: err.message || "Form API failed or network issue",
+            clientEmail: "nakibw@gmail.com",
+            leadData: { name, email, phone, service, details },
+          }),
+        });
+      } catch (backupErr) {
+        console.error("Backup outage alert report failed:", backupErr);
+      }
     }
   };
 
@@ -198,6 +240,18 @@ export default function HeroForm() {
         onChange={(e) => setDetails(e.target.value)}
         className={`${inputClass} resize-none`}
       />
+
+      {/* Honeypot — hidden from humans, bots fill it */}
+      <div className="absolute left-[-9999px]" aria-hidden="true">
+        <input
+          type="text"
+          name="confirm_email"
+          tabIndex={-1}
+          autoComplete="off"
+          value={confirmEmail}
+          onChange={(e) => setConfirmEmail(e.target.value)}
+        />
+      </div>
 
       {/* Simple Math Captcha */}
       <div className="flex items-center gap-3">
