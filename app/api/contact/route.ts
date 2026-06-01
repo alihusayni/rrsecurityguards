@@ -22,6 +22,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, ok: true });
     }
 
+    // Spam check
+    if (isSuspiciousSpam(name, email, undefined, details)) {
+      console.warn(`[Spam Detected] siteName: RR Security Guards, name: "${name}", email: "${email}", details: "${details}"`);
+      return NextResponse.json({ success: true, ok: true });
+    }
+
+
     // ---------- Abandoned form handler ----------
     if (body.abandoned === true) {
       const hasData = !!(name || email || phone);
@@ -220,3 +227,33 @@ export async function POST(req: Request) {
     );
   }
 }
+
+function isGibberish(val: any): boolean {
+  if (typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  if (!/^[a-zA-Z]{8,30}$/.test(trimmed)) return false;
+  const hasUpper = /[A-Z]/.test(trimmed);
+  const hasLower = /[a-z]/.test(trimmed);
+  if (!hasUpper || !hasLower) return false;
+  // Must contain at least one uppercase letter after the first character
+  return /[A-Z]/.test(trimmed.slice(1));
+}
+
+function hasExcessiveDots(emailVal: any): boolean {
+  if (typeof emailVal !== 'string') return false;
+  const cleanEmail = emailVal.trim().toLowerCase();
+  if (!cleanEmail.endsWith('@gmail.com') && !cleanEmail.endsWith('@googlemail.com')) return false;
+  const username = cleanEmail.split('@')[0];
+  const dotCount = (username.match(/\./g) || []).length;
+  return dotCount >= 4;
+}
+
+function isSuspiciousSpam(name: any, email: any, addressOrLocation: any, message: any): boolean {
+  let score = 0;
+  if (isGibberish(name)) score++;
+  if (isGibberish(addressOrLocation)) score++;
+  if (isGibberish(message)) score++;
+  if (hasExcessiveDots(email)) score++;
+  return score >= 2;
+}
+
