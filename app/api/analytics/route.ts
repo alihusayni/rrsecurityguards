@@ -34,10 +34,22 @@ export async function POST(request: NextRequest) {
             body.events = body.events.slice(0, 25);
         }
 
+        const userAgent = request.headers.get('user-agent') || '';
+
         fetch(GA4_ENDPOINT, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ client_id: body.client_id, events: body.events }),
+            headers: {
+                'Content-Type': 'application/json',
+                ...(clientIp ? { 'x-forwarded-for': clientIp } : {}),
+            },
+            body: JSON.stringify({
+                client_id: body.client_id,
+                events: body.events,
+                // Forward real visitor IP for accurate geographic data in GA4
+                ...(clientIp ? { user_ip_override: clientIp } : {}),
+                // Forward user agent for device/browser detection
+                ...(userAgent ? { user_agent: userAgent } : {}),
+            }),
         }).catch(() => {});
 
         return new NextResponse(null, { status: 204 });
