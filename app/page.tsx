@@ -2,13 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import type { Metadata } from "next";
-import HeroForm from "@/components/HeroForm";
 
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.rrsecurityguards.com/",
   },
 };
+
+// Used in hero (above-fold, SSR'd) and contact section (below-fold, lazy)
+const HeroForm = dynamic(() => import("@/components/HeroForm"), {
+  ssr: true,
+  loading: () => <div className="h-[300px] animate-pulse bg-white/5 rounded-lg" />,
+});
 
 const LazyHeroForm = dynamic(() => import("@/components/HeroForm"), {
   loading: () => <div className="h-[300px] animate-pulse bg-white/5 rounded-lg" />,
@@ -299,6 +304,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           SERVICES SECTION (row 1 – 3 + 3 + 1 grid)
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section id="services" className="section bg-white">
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -356,10 +362,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           ADDITIONAL SERVICES (Residential / Commercial / Events)
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-[var(--color-surface)]">
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -422,10 +430,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           CTA BANNER + ABOUT
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section id="about" className="relative bg-[var(--color-dark)] overflow-hidden">
         <div className="absolute inset-0 opacity-15">
           <Image
@@ -433,6 +443,7 @@ export default function Home() {
             alt="Irvine Spectrum"
             fill
             loading="lazy"
+            sizes="100vw"
             className="object-cover"
           />
         </div>
@@ -444,6 +455,7 @@ export default function Home() {
                 alt="Aerial view of Irvine, California"
                 fill
                 loading="lazy"
+                sizes="(max-width: 1024px) 100vw, 575px"
                 className="object-cover"
               />
             </div>
@@ -470,10 +482,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           TRUSTED BY — GOOGLE REVIEWS
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-white">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-4">
@@ -567,10 +581,12 @@ export default function Home() {
           </p>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           WHY CHOOSE US
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-white">
         <div className="container">
           <div className="max-w-3xl mx-auto">
@@ -605,10 +621,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           SERVICE AREAS
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-[var(--color-surface)]">
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -651,10 +669,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           MAP — SERVICE COVERAGE
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-white">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-10">
@@ -682,10 +702,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           FAQ
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section className="section bg-white">
         <div className="container">
           <div className="max-w-3xl mx-auto">
@@ -731,10 +753,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ═══════════════════════════════════════════
           CONTACT
       ═══════════════════════════════════════════ */}
+      <div className="content-lazy">
       <section id="contact" className="section bg-[var(--color-dark)]">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -799,6 +823,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </div>
     </>
   );
 }

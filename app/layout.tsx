@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Roboto_Slab } from "next/font/google";
+import { Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CallRailLoader from "@/components/callrail-loader";
@@ -10,7 +11,10 @@ import "./globals.css";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "600"],
+  // 600 MUST be first — next/font preloads the first weight in the array.
+  // Hero H1 uses font-semibold (600). If preload is ever re-enabled,
+  // this ensures the correct weight is fetched before the LCP element renders.
+  weight: ["600", "400", "300"],
   display: "optional",
   preload: false,
 });
@@ -66,7 +70,10 @@ export default function RootLayout({
         <main className="flex-1 pt-20 md:pt-24">{children}</main>
         <Footer />
         <CallRailLoader />
-        <Analytics />
+        {/* Suspense required for usePathname() in Next.js 15 App Router */}
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
 
       </body>
     </html>

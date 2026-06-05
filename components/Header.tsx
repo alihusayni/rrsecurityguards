@@ -67,6 +67,7 @@ export default function Header() {
               alt="Rapid Response Security Guards"
               width={140}
               height={60}
+              loading="eager"
               className="h-14 md:h-[70px] w-auto object-contain"
             />
           </Link>

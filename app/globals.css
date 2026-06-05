@@ -47,10 +47,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Smooth scroll ── */
-html {
-  scroll-behavior: smooth;
-}
+/* ── Smooth scroll (single declaration) ── */
 
 /* ── Container utility ── */
 .container {
@@ -158,4 +155,12 @@ html {
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* ── Below-fold layout deferral (content-visibility) ── */
+/* Applied to all sections that are NOT above the fold.  */
+/* Browser skips layout/paint until section is near viewport. */
+.content-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
