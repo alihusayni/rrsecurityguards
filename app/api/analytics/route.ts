@@ -40,15 +40,14 @@ export async function POST(request: NextRequest) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...(clientIp ? { 'x-forwarded-for': clientIp } : {}),
+                // User-Agent header is how GA4 MP detects device/browser — NOT a body field
+                ...(userAgent ? { 'User-Agent': userAgent } : {}),
             },
             body: JSON.stringify({
                 client_id: body.client_id,
                 events: body.events,
-                // Forward real visitor IP for accurate geographic data in GA4
+                // user_ip_override IS a valid MP body field — enables accurate geo data
                 ...(clientIp ? { user_ip_override: clientIp } : {}),
-                // Forward user agent for device/browser detection
-                ...(userAgent ? { user_agent: userAgent } : {}),
             }),
         }).catch(() => {});
 
