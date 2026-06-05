@@ -1,7 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import type { Metadata } from "next";
 import HeroForm from "@/components/HeroForm";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://www.rrsecurityguards.com/",
+  },
+};
 
 const LazyHeroForm = dynamic(() => import("@/components/HeroForm"), {
   loading: () => <div className="h-[300px] animate-pulse bg-white/5 rounded-lg" />,
