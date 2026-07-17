@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Poppins, Roboto_Slab } from "next/font/google";
 import { Suspense } from "react";
+import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CallRailLoader from "@/components/callrail-loader";
-import { Analytics } from "@/components/analytics";
 import "./globals.css";
 
 
@@ -70,11 +70,11 @@ export default function RootLayout({
         <main className="flex-1 pt-20 md:pt-24">{children}</main>
         <Footer />
         <CallRailLoader />
-        {/* Suspense required for usePathname() in Next.js 15 App Router */}
-        <Suspense fallback={null}>
-          <Analytics />
-        </Suspense>
-
+        <Script
+          src="https://www.despora.ai/despora-pixel.js"
+          data-project="rrsecurityguards"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
